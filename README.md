@@ -11,17 +11,17 @@
 **Status:** Complete
 
 ---
+## Executive Summary
 
-# Executive Summary
+The objective of this phase was to assess the authentication mechanisms protecting the Mediroza General Hospital web application and determine whether restricted functionality or sensitive resources could be accessed by unauthorized users.
 
-The objective of this phase was to assess the authentication mechanisms protecting the Mediroza General Hospital web application and determine whether restricted functionality or sensitive resources could be accessed.
+During testing, the Patient Portal authentication mechanism was found to be vulnerable to **SQL Injection**. Exploitation of this vulnerability allowed authentication controls to be bypassed and resulted in unauthorized access to the Patient Portal without valid credentials. Following successful authentication bypass, restricted patient functionality became available, including downloadable pathology reports intended only for authenticated users.
 
-During testing, authenticated access was successfully obtained to the Patient Portal. Access to the portal exposed downloadable pathology reports and confirmed the existence of protected patient resources behind authentication controls.
-
-In addition, a publicly accessible database backup discovered during reconnaissance remained accessible and provided access to internal organizational data. Initial review confirmed the presence of employee and business-related records. Detailed analysis of the exposed data was reserved for Milestone 3 as required by the assessment objectives.
+In addition, a publicly accessible database backup identified during the Application Mapping phase remained accessible during testing. Preliminary review confirmed the presence of internal organizational records. Detailed analysis of the exposed data was reserved for **Milestone 3** in accordance with engagement objectives.
 
 No authenticated access to the Staff Portal was obtained during this phase.
 
+---
 ---
 
 # Assessment Scope
@@ -34,159 +34,152 @@ No authenticated access to the Staff Portal was obtained during this phase.
 | Status | Complete |
 
 ---
+## Assessment Objectives
 
-# Assessment Objectives
-
-The objectives of this phase were:
-
-- Assess Patient Portal authentication security
-- Assess Staff Portal authentication security
-- Determine whether access to restricted resources could be obtained
-- Identify protected functionality available after authentication
-- Confirm exposure of sensitive resources available to unauthorized users
+* ✅ Assess Patient Portal authentication security
+* ✅ Assess Staff Portal authentication security
+* ✅ Identify authentication weaknesses
+* ✅ Determine whether restricted resources could be accessed
+* ✅ Validate the impact of authentication bypass vulnerabilities
+* ✅ Confirm exposure of sensitive resources available to unauthorized users
 
 ---
 
-# Authentication Targets
+## Authentication Targets
 
-## Target 1 - Patient Portal
+### Target 1: Patient Portal (`/patient/login.php`)
 
-### Location
+* **Status:** ✅ Authentication Bypass Successful
+* **Evidence:** `SS014-PATIENT-LOGIN.png`, `SS018-PATIENT-PORTAL.png`, `PDF-PATIENT-DISCOVERED.png`, `SS011-ENTRY-POINTS.png`
 
-```text
-/patient/login.php
-```
+#### Description
+The Patient Portal was identified during the Application Mapping phase and selected as the primary authentication target. Testing identified a SQL injection vulnerability within the login mechanism that allowed authentication controls to be bypassed, granting unauthorized access to restricted patient functionality.
 
-### Status
+#### Authentication Testing Details
 
-✅ Access Achieved
+| Parameter | Value / Outcome |
+| :--- | :--- |
+| **Target** | Patient Portal Login (`/patient/login.php`) |
+| **Input Tested** | Username Field |
+| **Payload (`Username`)** | `admin'--` |
+| **Payload (`Password`)** | `12345` |
+| **Result** | Input was not sanitized; SQL comment (`--`) truncated password verification |
+| **Outcome** | Authenticated as `admin` without a valid password; full Patient Portal access obtained |
 
-### Evidence
+#### Root Cause
+* User-controlled input concatenated directly into backend SQL queries
+* Absence of parameterized queries or prepared statements
+* Lack of server-side input validation on the login form
 
-- SS014-PATIENT-LOGIN.png
-- SS018-PATIENT-PORTAL.png
+#### Impact
+* Complete authentication bypass without valid credentials
+* Unauthorized Patient Portal session establishment
+* Access to restricted patient functionality and downloadable pathology reports
+
+---
+
+### Target 2: Staff Portal (`/staff/login.php`)
+
+* **Status:** ⚪ Identified Only (No Bypass Achieved)
+* **Evidence:** `SS015-STAFF-LOGIN.png`
+
+#### Description
+The Staff Portal was identified during Application Mapping and included in authentication testing. No successful authentication bypass or authenticated access was achieved against the Staff Portal during this phase.
+
+---
+
+## Finding IA-001: Authentication Bypass via SQL Injection
+
+* **Severity:** `CRITICAL`
+* **Status:** Confirmed
+* **Affected Endpoint:** `/patient/login.php`
+
+---
 
 ### Description
 
-The Patient Portal was identified during application mapping and selected as the primary authentication target.
-
-Testing successfully progressed beyond the login interface and resulted in authenticated access to restricted patient functionality.
+The Patient Portal authentication mechanism was vulnerable to SQL injection. Testing demonstrated that user-controlled input supplied to the username field was incorporated directly into backend SQL queries without sufficient validation or sanitization. Manipulation of the username field (`admin'--`) commented out the remainder of the query, allowing password verification to be bypassed entirely and granting unauthorized access to `/patient/portal.php`.
 
 ---
 
-## Target 2 - Staff Portal
+### Authentication Testing Summary
 
-### Location
-
-```text
-/staff/login.php
-```
-
-### Status
-
-⚪ Identified Only
-
-### Evidence
-
-- SS015-STAFF-LOGIN.png
-
-### Description
-
-The Staff Portal was identified and reviewed during testing.
-
-No authenticated access to the Staff Portal was obtained during Milestone 1.
+| Field / Attribute | Value |
+| :--- | :--- |
+| **Target** | Patient Portal Login (`/patient/login.php`) |
+| **Input Tested** | Username Field |
+| **Username Entered** | `admin'--` |
+| **Password Entered** | `12345` |
+| **Outcome** | Authenticated as `admin` without a valid password (`12345` ignored) |
 
 ---
 
-# Finding IA-001
+### Proof of Access
 
-## Authenticated Access to Patient Portal
+Following the authentication bypass, the application redirected to `/patient/portal.php` and established an active session (confirmed by the presence of a **Logout** option). The authenticated dashboard displayed the **My Reports** section along with the following notice:
 
-### Severity
+> *"Your reports are password protected. Use the password sent to you by the laboratory to open each file."*
 
-**High**
-
----
-
-## Description
-
-Authentication testing resulted in successful access to the patient portal located at:
-
-```text
-/patient/portal.php
-```
-
-Following authentication, a valid session was established and the application exposed resources unavailable to unauthenticated users.
-
----
-
-## Evidence
-
-- SS018-PATIENT-PORTAL.png
-- PDF-PATIENT-DISCOVERED.png
-
----
-
-## Proof of Access
-
-The authenticated application displayed:
-
-```text
-My Reports
-```
-
-and presented the message:
-
-```text
-Your reports are password protected.
-Use the password sent to you by the laboratory
-to open each file.
-```
-
-The portal also displayed a logout button, confirming a valid authenticated session.
-
----
-
-## Restricted Resources Discovered
-
-The patient dashboard exposed downloadable medical reports.
+#### Restricted Resources Discovered
+The authenticated dashboard exposed downloadable pathology reports for multiple patients:
 
 | Report | Laboratory Reference | Date |
-|----------|----------|----------|
-| Pathology Report - S. Dlamini | LR-2024-1187 | 2024-11-04 |
-| Pathology Report - P. Reddy | LR-2024-1192 | 2024-11-05 |
-| Pathology Report - E. Thompson | LR-2024-1205 | 2024-11-06 |
+| :--- | :--- | :--- |
+| Pathology Report - S. Dlamini | `LR-2024-1187` | `2024-11-04` |
+| Pathology Report - P. Reddy | `LR-2024-1192` | `2024-11-05` |
+| Pathology Report - E. Thompson | `LR-2024-1205` | `2024-11-06` |
 
 ---
 
-## Retrieved Report References
+### Root Cause Analysis
 
-### Report 1
+Investigation indicates the vulnerability was caused by:
+1. User input concatenated directly into dynamic SQL queries.
+2. Lack of parameterized queries or prepared statements (`PDO` / `mysqli` bound parameters).
+3. Absence of effective server-side validation on authentication parameters.
 
-```text
-Pathology Report
-Patient: S. Dlamini
-Reference: LR-2024-1187
-Date: 2024-11-04
-```
+---
 
-### Report 2
+### Security Impact
 
-```text
-Pathology Report
-Patient: P. Reddy
-Reference: LR-2024-1192
-Date: 2024-11-05
-```
+* Full Patient Portal access as `admin` without valid credentials
+* Complete circumvention of primary authentication controls
+* Unauthorized access to restricted patient dashboards and downloadable medical/pathology reports
 
-### Report 3
+---
 
-```text
-Pathology Report
-Patient: E. Thompson
-Reference: LR-2024-1205
-Date: 2024-11-06
-```
+### Evidence
+
+* `SS014-PATIENT-LOGIN.png`
+* `SS018-PATIENT-PORTAL.png`
+* `PDF-PATIENT-DISCOVERED.png`
+* `SS011-ENTRY-POINTS.png`
+* SQL backup file (`mediroza_db_backup_2019.sql`)
+
+---
+
+### Remediation
+
+1. **Parameterized Queries:** Replace all dynamic SQL queries in `/patient/login.php` with prepared statements and bound parameters (`PDO` or `mysqli`).
+2. **Input Validation:** Implement strict server-side allowlist validation on username/ID and password fields.
+3. **Password Verification:** Ensure authentication relies on secure password hashing (`password_hash()` / `password_verify()`) rather than raw SQL comparisons.
+4. **Source Code Audit:** Conduct a full security review of all authentication and database interaction endpoints across the application.
+5. **Regression Testing:** Perform post-remediation verification testing to confirm SQL injection payloads are rejected.
+
+---
+
+### Risk Rating
+
+| Metric | Rating |
+| :--- | :--- |
+| **Likelihood** | High |
+| **Impact** | Critical |
+| **Overall Risk** | **CRITICAL** |
+
+
+
+
+
 
 ---
 ## Finding IA-002: Review of Exposed Database Backup
@@ -279,9 +272,20 @@ The exposed backup bypasses all application authentication mechanisms and provid
 
 | Finding ID | Finding | Severity |
 | :--- | :--- | :--- |
-| **IA-001** | Authenticated Access to Patient Portal | `HIGH` |
-| **IA-002** | Review of Exposed Database Backup | `CRITICAL` |
+| **IA-001** | Authentication Bypass via SQL Injection | **CRITICAL** |
+| **IA-002** | Review of Exposed Database Backup | **CRITICAL** |
 
+---
+
+### Risk Overview
+
+Milestone 1 identified two Critical security findings.
+
+**IA-001** demonstrated that the Patient Portal authentication mechanism could be bypassed through SQL injection, allowing unauthorized access to restricted patient functionality without valid credentials.
+
+**IA-002** confirmed that a database backup identified during the Application Mapping phase remained publicly accessible and could be retrieved without authentication, exposing internal organizational information outside normal application security controls.
+
+Together, these findings indicate significant weaknesses in both authentication security and sensitive data protection, requiring immediate remediation.
 ---
 
 ## Evidence Inventory
@@ -292,7 +296,7 @@ The exposed backup bypasses all application authentication mechanisms and provid
 | `SS015-STAFF-LOGIN.png` | Staff Login Portal |
 | `SS016-OLD-DIRECTORY.png` | Exposed Directory Listing |
 | `SS017-DATABASE-BACKUP.png` | Retrieved SQL Backup |
-| `SS018-PATIENT-PORTAL.png` | Authenticated Patient Portal |
+| `SS018-PATIENT-PORTAL.png` | Patient Portal Session Following Authentication Bypass |
 | `PDF-PATIENT-DISCOVERED.png` | Downloadable Patient Reports |
 | `OLD PAGE.png` | Public Directory Listing |
 
@@ -300,18 +304,23 @@ The exposed backup bypasses all application authentication mechanisms and provid
 
 ## Conclusion
 
-Milestone 1 objectives were successfully completed, validating two significant attack paths:
+Milestone 1 objectives were successfully completed, validating two critical attack paths.
 
-* ✅ **Authenticated Patient Portal Access:** Resulted in access to restricted patient functionality and downloadable pathology reports (`IA-001`).
-* ✅ **Unauthenticated Database Backup Exposure:** Confirmed that internal organizational and HR records were accessible directly from the web server outside authentication controls (`IA-002`).
+* ✅ **Authentication Bypass via SQL Injection:** Testing confirmed that the Patient Portal authentication mechanism was vulnerable to SQL injection. Successful exploitation bypassed password verification and resulted in unauthorized access to restricted patient functionality, including downloadable pathology reports (`IA-001`).
 
-Although no authenticated access to the Staff Portal was obtained, employee-related information was observed within the exposed backup. Detailed analysis of this data forms part of **Milestone 3: Critical Data Exposure**.
+* ✅ **Unauthenticated Database Backup Exposure:** Review of the database backup identified during the Application Mapping phase confirmed that internal organizational information remained accessible directly through the web server without authentication (`IA-002`).
+
+Although no authenticated access to the Staff Portal was obtained, employee-related information was observed within the exposed database backup. Detailed analysis of those records, including employee and shareholder data, forms part of **Milestone 3: Critical Data Exposure**.
+
+The combination of an authentication bypass vulnerability and a publicly accessible database backup represents a significant compromise of both authentication security and sensitive data protection mechanisms.
 
 ---
 
 > **Milestone Status:** ✅ Complete  
-> **Outcome 1:** Authenticated Patient Portal Access Achieved  
-> **Outcome 2:** Public Database Backup Access Confirmed
+>
+> **Outcome 1:** Authentication Bypass Successfully Achieved (`IA-001`)  
+>
+> **Outcome 2:** Public Database Backup Access Confirmed (`IA-002`)  
 
 
 **Next Phase:** Milestone 2 - Crack the encryption on all 3 retrieved files

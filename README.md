@@ -8,17 +8,19 @@
 **Target:** https://medirozahospital.com  
 **Analyst:** Anderson Edaiyo Uzezi  
 **Assessment Date:** 25 November 2026  
-**Status:** Completed
+**Status:** Complete
 
 ---
 
 # Executive Summary
 
-The objective of this phase was to assess the security of the authentication mechanisms protecting the Mediroza General Hospital Patient and Staff portals and to determine whether unauthorized access to restricted resources could be obtained.
+The objective of this phase was to assess the authentication mechanisms protecting the Mediroza General Hospital web application and determine whether restricted functionality or sensitive resources could be accessed.
 
-During testing, access was obtained to the authenticated Patient Portal. Following successful authentication testing, sensitive resources became accessible, including protected laboratory report downloads and organizational data exposed through an improperly secured database backup file.
+During testing, authenticated access was successfully obtained to the Patient Portal. Access to the portal exposed downloadable pathology reports and confirmed the existence of protected patient resources behind authentication controls.
 
-The assessment confirmed the existence of weaknesses that resulted in exposure of confidential business information and patient-related resources.
+In addition, a publicly accessible database backup discovered during reconnaissance remained accessible and provided access to internal organizational data. Initial review confirmed the presence of employee and business-related records. Detailed analysis of the exposed data was reserved for Milestone 3 as required by the assessment objectives.
+
+No authenticated access to the Staff Portal was obtained during this phase.
 
 ---
 
@@ -27,86 +29,113 @@ The assessment confirmed the existence of weaknesses that resulted in exposure o
 | Item | Value |
 |--------|--------|
 | Target Domain | medirozahospital.com |
+| Assessment Type | Authorized Black-Box |
 | Phase | Initial Access & Authentication Testing |
-| Authentication Targets | Patient Portal, Staff Portal |
-| Testing Type | Authorized |
 | Status | Complete |
+
+---
+
+# Assessment Objectives
+
+The objectives of this phase were:
+
+- Assess Patient Portal authentication security
+- Assess Staff Portal authentication security
+- Determine whether access to restricted resources could be obtained
+- Identify protected functionality available after authentication
+- Confirm exposure of sensitive resources available to unauthorized users
 
 ---
 
 # Authentication Targets
 
-## Target A
+## Target 1 - Patient Portal
+
+### Location
 
 ```text
 /patient/login.php
 ```
 
-**Purpose:** Patient Authentication Portal
+### Status
+
+✅ Access Achieved
 
 ### Evidence
 
 - SS014-PATIENT-LOGIN.png
+- SS018-PATIENT-PORTAL.png
+
+### Description
+
+The Patient Portal was identified during application mapping and selected as the primary authentication target.
+
+Testing successfully progressed beyond the login interface and resulted in authenticated access to restricted patient functionality.
 
 ---
 
-## Target B
+## Target 2 - Staff Portal
+
+### Location
 
 ```text
 /staff/login.php
 ```
 
-**Purpose:** Internal Staff Authentication Portal
+### Status
+
+⚪ Identified Only
 
 ### Evidence
 
 - SS015-STAFF-LOGIN.png
 
+### Description
+
+The Staff Portal was identified and reviewed during testing.
+
+No authenticated access to the Staff Portal was obtained during Milestone 1.
+
 ---
 
 # Finding IA-001
 
-## Unauthorized Access to Patient Portal
+## Authenticated Access to Patient Portal
 
 ### Severity
 
-**Critical**
+**High**
 
 ---
 
 ## Description
 
-Testing confirmed access to an authenticated patient area located at:
+Authentication testing resulted in successful access to the patient portal located at:
 
 ```text
 /patient/portal.php
 ```
 
-Following authentication, the application displayed a patient dashboard containing downloadable pathology reports.
+Following authentication, a valid session was established and the application exposed resources unavailable to unauthenticated users.
 
-### Evidence
+---
+
+## Evidence
 
 - SS018-PATIENT-PORTAL.png
-- PDF PATIENT DISCOVERED.png
+- PDF-PATIENT-DISCOVERED.png
 
 ---
 
 ## Proof of Access
 
-Authenticated page observed:
+The authenticated application displayed:
 
 ```text
 My Reports
 ```
 
-Portal functionality included:
-
-- Authenticated patient session
-- Laboratory report listing
-- Download functionality
-- Logout controls
-
-Visible page content:
+and presented the message:
 
 ```text
 Your reports are password protected.
@@ -114,11 +143,13 @@ Use the password sent to you by the laboratory
 to open each file.
 ```
 
+The portal also displayed a logout button, confirming a valid authenticated session.
+
 ---
 
-# Retrieved Medical Report References
+## Restricted Resources Discovered
 
-The portal exposed three downloadable reports:
+The patient dashboard exposed downloadable medical reports.
 
 | Report | Laboratory Reference | Date |
 |----------|----------|----------|
@@ -128,34 +159,31 @@ The portal exposed three downloadable reports:
 
 ---
 
-# Evidence of Downloadable Patient Data
+## Retrieved Report References
 
-Three patient report files were presented within the authenticated portal.
-
-## Retrieved File 1
+### Report 1
 
 ```text
-Pathology Report - S. Dlamini
+Pathology Report
+Patient: S. Dlamini
 Reference: LR-2024-1187
 Date: 2024-11-04
 ```
 
----
-
-## Retrieved File 2
+### Report 2
 
 ```text
-Pathology Report - P. Reddy
+Pathology Report
+Patient: P. Reddy
 Reference: LR-2024-1192
 Date: 2024-11-05
 ```
 
----
-
-## Retrieved File 3
+### Report 3
 
 ```text
-Pathology Report - E. Thompson
+Pathology Report
+Patient: E. Thompson
 Reference: LR-2024-1205
 Date: 2024-11-06
 ```
@@ -164,7 +192,7 @@ Date: 2024-11-06
 
 # Finding IA-002
 
-## Public Database Backup Exposure
+## Exposure of Internal Database Backup
 
 ### Severity
 
@@ -174,7 +202,7 @@ Date: 2024-11-06
 
 ## Description
 
-A publicly accessible SQL backup file was identified through directory listing.
+During assessment activities, a publicly accessible database backup file was identified within an exposed directory.
 
 ### Exposed Resource
 
@@ -182,127 +210,88 @@ A publicly accessible SQL backup file was identified through directory listing.
 /old/mediroza_db_backup_2019.sql
 ```
 
+The file was accessible without authentication.
+
 ---
 
 ## Evidence
 
-- SS017-DATABASE-BACKUP.png
 - SS016-OLD-DIRECTORY.png
+- SS017-DATABASE-BACKUP.png
 
 ---
 
-## Backup Metadata
+## Proof of Access
 
-The backup file contained the following header information:
+The file contained metadata identifying it as an internal organizational backup.
+
+Observed header information:
 
 ```text
 Mediroza General Hospital - Internal Database Backup
+
 Generated by Mediroza CMS 1.4.2 Backup Module
+
 Database: mediroza_hr
+
 Backup Date: 2019-08-27
 ```
 
 ---
 
-# Sensitive Business Information Recovered
+## Initial Data Exposure Observed
 
-## Shareholder Records
+A preliminary review confirmed the presence of internal records including:
 
-The backup exposed shareholder ownership information.
+- Employee information
+- Human resources records
+- Internal email addresses
+- Internal contact information
+- Organizational data
+- Shareholder-related records
 
-| Shareholder | Ownership | Shares Held | Class |
-|------------|------------|------------|------------|
-| Dr. Rajesh Naidoo | 18.0% | 180,000 | Ordinary |
-| Cedar Health Holdings (Pty) Ltd | 15.0% | 150,000 | Ordinary |
-| Dr. Johan van der Merwe | 12.0% | 120,000 | Ordinary |
-| Reddy Family Trust | 11.0% | 110,000 | Ordinary |
-| Thabo Molefe | 10.0% | 100,000 | Ordinary |
-| Sarah Botha | 9.0% | 90,000 | Ordinary |
-| Dr. Ahmed Kara | 8.0% | 80,000 | Preferential |
-| Naledi Zulu | 7.0% | 70,000 | Ordinary |
-| Michael Roberts | 6.0% | 60,000 | Ordinary |
-| Dr. Vikram Chetty | 4.0% | 40,000 | Preferential |
+Detailed analysis of the exposed information was deferred to Milestone 3 in accordance with the engagement objectives.
 
 ---
 
-## Employee Compensation Data
+## Security Impact
 
-The backup exposed salary and staffing information.
+The public exposure of a database backup file significantly increases organizational risk because sensitive information becomes available outside the application's authentication controls.
 
-| Name | Position | Department | Salary | Hire Date |
-|--------|--------|--------|--------|--------|
-| Dr. Suresh Moodley | Consultant Radiologist | Radiology | 130,000 | 2012-02-28 |
-| Dr. Vikram Chetty | Anaesthetist | Theatre | 135,000 | 2011-06-13 |
-| Dr. Fatima Patel | Pediatrician | Pediatrics | 118,000 | 2013-10-17 |
-| David Smith | Facilities Manager | Operations | 52,000 | 2014-10-27 |
-| Nisha Singh | Physiotherapist | Rehabilitation | 48,000 | 2016-11-09 |
-| P. Radebe | Radiographer | Radiology | 43,000 | 2017-04-11 |
-| Deepak Pillay | Lab Technologist | Diagnostics Lab | 41,000 | 2015-05-20 |
-| Peter van Wyk | Procurement Officer | Supply Chain | 38,000 | 2015-08-24 |
-| Kavitha Govender | Lab Technician | Diagnostics Lab | 35,000 | 2018-08-06 |
-| Karen O'Connor | Billing Administrator | Finance | 29,000 | 2018-03-19 |
-| James Wilson | Security Supervisor | Operations | 27,000 | 2019-09-02 |
-| Andile Mbeki | Ward Clerk | Administration | 21,000 | 2019-11-05 |
-| Linda Fourie | Receptionist | Front Office | 19,000 | 2020-02-10 |
+The backup bypasses normal access restrictions and exposes internal information directly through the web server.
 
 ---
 
-# Impact Assessment
+## Recommendation
 
-Successful access resulted in exposure of:
-
-- Patient medical report references
-- Downloadable laboratory reports
-- Internal employee information
-- Salary records
-- Shareholder ownership data
-- Corporate business information
-- Internal organizational structure
-
-Potential consequences include:
-
-- Confidentiality breach
-- Privacy violations
-- Exposure of sensitive healthcare information
-- Reputational damage
-- Regulatory compliance failures
+1. Remove publicly accessible backup files immediately.
+2. Disable directory listing.
+3. Store backups outside the web root.
+4. Review historical exposure of backup files.
+5. Conduct a data exposure assessment.
+6. Review backup management procedures.
 
 ---
 
 # Risk Summary
 
-| Finding ID | Title | Severity |
-|------------|---------|---------|
-| IA-001 | Unauthorized Access to Patient Portal | Critical |
-| IA-002 | Public Database Backup Exposure | Critical |
-
----
-
-# Recommendations
-
-## Immediate Actions
-
-1. Disable public access to backup files.
-2. Remove database backups from web-accessible locations.
-3. Disable directory listing on all production systems.
-4. Review all authentication controls.
-5. Validate authorization checks for patient resources.
-6. Rotate exposed credentials if present elsewhere in the environment.
-7. Review access logs for evidence of unauthorized access.
-8. Conduct a full exposure assessment.
+| Finding ID | Finding | Severity |
+|------------|----------|----------|
+| IA-001 | Authenticated Access to Patient Portal | High |
+| IA-002 | Public Exposure of Internal Database Backup | Critical |
 
 ---
 
 # Evidence Inventory
 
-| Screenshot | Description |
+| Evidence | Description |
 |------------|------------|
 | SS014-PATIENT-LOGIN.png | Patient Login Portal |
 | SS015-STAFF-LOGIN.png | Staff Login Portal |
 | SS016-OLD-DIRECTORY.png | Exposed Directory Listing |
-| SS017-DATABASE-BACKUP.png | Public SQL Backup |
+| SS017-DATABASE-BACKUP.png | Publicly Accessible SQL Backup |
 | SS018-PATIENT-PORTAL.png | Authenticated Patient Portal |
-| PDF PATIENT DISCOVERED.png | Downloadable Patient Reports |
+| PDF-PATIENT-DISCOVERED.png | Downloadable Patient Reports |
 
 ---
 
@@ -310,13 +299,24 @@ Potential consequences include:
 
 Milestone 1 objectives were successfully completed.
 
-The assessment confirmed that restricted application functionality could be reached and sensitive resources became accessible following authentication testing. Additionally, a publicly exposed SQL backup disclosed confidential organizational information.
+Assessment activities identified two significant attack paths.
 
-The combination of accessible patient report resources and exposed database backups constitutes a Critical security risk requiring immediate remediation.
+The first resulted in successful authenticated access to the Patient Portal, exposing restricted patient functionality and downloadable pathology reports.
+
+The second involved the discovery of a publicly accessible database backup file that exposed internal organizational information outside the application's authentication controls.
+
+Although no authenticated access to the Staff Portal was obtained, employee-related information was observed within the exposed database backup. Detailed analysis of that information forms part of Milestone 3: Critical Data Exposure.
+
+---
 
 **Milestone Status:** ✅ Complete
 
-**Outcome:** Successful Initial Access Achieved
+**Outcome 1:** Authenticated Patient Portal Access Achieved
 
-**Next Phase:** Milestone 2 : Crack the encryption on all 3 retrieved files
+**Outcome 2:** Public Database Backup Access Confirmed
+
+**Staff Portal Access:** Not Achieved
+
+**Next Phase:** Milestone 2 - Crack the encryption on all 3 retrieved files
+
 

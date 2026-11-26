@@ -323,6 +323,11 @@ The combination of an authentication bypass vulnerability and a publicly accessi
 > **Outcome 2:** Public Database Backup Access Confirmed (`IA-002`)  
 
 
-**Next Phase:** Milestone 2 - Crack the encryption on all 3 retrieved files
+**Next Phase:** Milestone 2 - Data Extraction and Recovery of Encrypted Patient Records
 
+
+## 👤 Author
+**Anderson Edaiyo Uzezi**  
+Cybersecurity Professional B084  
+LinkedIn: https://www.linkedin.com/in/anderson-edaiyo-bab74117b
 

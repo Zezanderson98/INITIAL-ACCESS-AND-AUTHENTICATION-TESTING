@@ -37,7 +37,7 @@ No authenticated access to the Staff Portal was obtained during this phase.
 ## Assessment Objectives
 
 * ✅ Assess Patient Portal authentication security
-* ✅ Assess Staff Portal authentication security
+* ⬜ Assess Staff Portal authentication security
 * ✅ Identify authentication weaknesses
 * ✅ Determine whether restricted resources could be accessed
 * ✅ Validate the impact of authentication bypass vulnerabilities
@@ -80,7 +80,7 @@ The Patient Portal was identified during the Application Mapping phase and selec
 
 ### Target 2: Staff Portal (`/staff/login.php`)
 
-* **Status:** ⚪ Identified Only (No Bypass Achieved)
+* **Status:** ⬜ Identified Only (No Bypass Achieved)
 * **Evidence:** `SS015-STAFF-LOGIN.png`
 
 #### Description

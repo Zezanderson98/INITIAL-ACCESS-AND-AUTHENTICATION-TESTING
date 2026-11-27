@@ -50,7 +50,49 @@ No authenticated access to the Staff Portal was obtained during this phase.
 ### Target 1: Patient Portal (`/patient/login.php`)
 
 * **Status:** ✅ Authentication Bypass Successful
-* **Evidence:** `SS014-PATIENT-LOGIN.png`, `SS018-PATIENT-PORTAL.png`, `PDF-PATIENT-DISCOVERED.png`, `SS011-ENTRY-POINTS.png`
+
+
+* **Evidence:**
+
+
+
+  SS014-PATIENT-LOGIN.png
+
+
+
+
+<img width="1366" height="768" alt="SS014-PATIENT -LOGIN" src="https://github.com/user-attachments/assets/d81dc928-7a33-4d77-be51-0e785a530243" />
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+  SS014B-PDF-PATIENT-DISCOVERED.png
+
+
+
+<img width="1366" height="768" alt="SS014B-PDF -PATIENT-DISCOVRED" src="https://github.com/user-attachments/assets/7f463fcc-d903-4f6f-a077-299263580b57" />
+
+
+
+
+
+
+
+
 
 #### Description
 The Patient Portal was identified during the Application Mapping phase and selected as the primary authentication target. Testing identified a SQL injection vulnerability within the login mechanism that allowed authentication controls to be bypassed, granting unauthorized access to restricted patient functionality.
@@ -81,7 +123,19 @@ The Patient Portal was identified during the Application Mapping phase and selec
 ### Target 2: Staff Portal (`/staff/login.php`)
 
 * **Status:** ⬜ Identified Only (No Bypass Achieved)
-* **Evidence:** `SS015-STAFF-LOGIN.png`
+* **Evidence:**
+
+
+ SS015-STAFF-LOGIN-FAIL.png`
+
+
+<img width="1366" height="768" alt="SS015-STAFF-LOGIN-FAIL" src="https://github.com/user-attachments/assets/c2bdc118-3bf0-4289-8079-7ffcb50b5c92" />
+
+
+
+
+
+
 
 #### Description
 The Staff Portal was identified during Application Mapping and included in authentication testing. No successful authentication bypass or authenticated access was achieved against the Staff Portal during this phase.
@@ -148,12 +202,7 @@ Investigation indicates the vulnerability was caused by:
 
 ---
 
-### Evidence
 
-* `SS014-PATIENT-LOGIN.png`
-* `SS018-PATIENT-PORTAL.png`
-* `PDF-PATIENT-DISCOVERED.png`
-* `SS011-ENTRY-POINTS.png`
 * SQL backup file (`mediroza_db_backup_2019.sql`)
 
 ---
@@ -215,9 +264,37 @@ The exposed file was subsequently reviewed during **Milestone 1** to assess the 
 
 ### Evidence
 
-* `SS016-OLD-DIRECTORY.png`
-* `SS017-DATABASE-BACKUP.png`
-* `OLD PAGE.png`
+SS011B-OLD-DIRECTORY.png`
+
+<img width="1366" height="768" alt="SS011B-OLD-DIRECTORY" src="https://github.com/user-attachments/assets/0dd66b39-e7b3-48e2-8396-75eed6df1804" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+SS011C-DATABASE-BACKUP.png`
+
+
+
+<img width="1366" height="768" alt="SS011C-DATABASE-BACKUP" src="https://github.com/user-attachments/assets/0db22f02-4295-4154-9806-b3511476e7e5" />
+
+
+
+
+
+
+
 
 ---
 
@@ -293,12 +370,12 @@ Together, these findings indicate significant weaknesses in both authentication 
 | Evidence | Description |
 | :--- | :--- |
 | `SS014-PATIENT-LOGIN.png` | Patient Login Portal |
-| `SS015-STAFF-LOGIN.png` | Staff Login Portal |
-| `SS016-OLD-DIRECTORY.png` | Exposed Directory Listing |
-| `SS017-DATABASE-BACKUP.png` | Retrieved SQL Backup |
-| `SS018-PATIENT-PORTAL.png` | Patient Portal Session Following Authentication Bypass |
-| `PDF-PATIENT-DISCOVERED.png` | Downloadable Patient Reports |
-| `OLD PAGE.png` | Public Directory Listing |
+| `SS014B-PDF-PATIENT-DISCOVERED.png` | Downloadable Patient Reports |
+| `SS015-STAFF-LOGIN-FAIL.png` | Staff Login Portal |
+| `SS011B-OLD-DIRECTORY.png` | Exposed Directory Listing |
+| `SS011C-DATABASE-BACKUP.png` | Retrieved SQL Backup |
+
+
 
 ---
 
